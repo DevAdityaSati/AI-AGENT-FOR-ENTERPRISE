@@ -1,142 +1,47 @@
-# 🤖 Enterprise Meeting Productivity AI Agent
+# AI Agent for Enterprise
 
-An AI-powered productivity assistant built using **n8n, OpenAI, Telegram, Gmail, Google Calendar, and Fireflies.ai** to automate meeting scheduling, email communication, and meeting transcript retrieval.
+An n8n AI assistant that receives requests through Telegram and can help with:
 
-## 🚀 Project Overview
+- Creating events in Google Calendar
+- Sending emails through Gmail
+- Retrieving Fireflies meeting titles and transcript IDs
+- Fetching Fireflies meeting summaries and action items
+- Responding to the user through Telegram
 
-Managing workplace productivity often requires switching between calendars, email inboxes, meeting transcripts, and messaging applications.
+## Workflow overview
 
-This project demonstrates how an AI agent can connect these services into a unified workflow. Users can send natural-language requests through Telegram, and the agent can use configured tools to perform tasks such as scheduling meetings, sending emails, and retrieving meeting transcript information.
+1. **Telegram Trigger** receives a message.
+2. **AI Agent** interprets the request and selects an appropriate connected tool.
+3. **Google Calendar** can create an event from the user's instructions.
+4. **Gmail** can send an email using the recipient, subject, and message extracted from the request.
+5. **Fireflies HTTP Request tools** query the Fireflies GraphQL API for meeting transcripts and summaries.
+6. **Send a text message** returns the agent's response to Telegram.
 
-The objective is to simplify routine administrative tasks through AI-powered workflow automation.
+## Files
 
-## ✨ Features
+- `ai-agent-for-enterprise.json` — workflow export for importing into n8n.
 
-- **Telegram Interface:** Accepts user requests through a Telegram bot.
-- **AI Agent:** Interprets natural-language instructions and selects the appropriate connected tools.
-- **Meeting Scheduling:** Uses Google Calendar to create calendar events.
-- **Meeting Links:** Supports Google Meet link generation when configured.
-- **Email Automation:** Uses Gmail to send meeting details and other requested messages.
-- **Meeting Transcript Retrieval:** Connects to Fireflies.ai through its GraphQL API.
-- **Dynamic Tool Inputs:** Supports AI-provided parameters for tool calls, such as transcript IDs.
-- **Workflow Orchestration:** Connects multiple services through n8n.
-- **Automated Notifications:** Reports task outcomes to the user through Telegram.
+## Import and configure
 
-## 🛠️ Tech Stack
+1. Download `ai-agent-for-enterprise.json`.
+2. In n8n, use **Import from File** to import the workflow.
+3. Configure your own credentials in n8n. Credential IDs from another n8n account may not exist in your instance, so reselect or recreate credentials where required.
+4. Configure the OpenAI chat model connection or select a model/provider supported by your n8n setup.
+5. Configure Telegram Trigger and Telegram messaging with your own Telegram bot credentials.
+6. Connect your own Gmail and Google Calendar credentials.
+7. In **both** Fireflies HTTP Request tool nodes, replace the placeholder authentication with your own Fireflies API key using n8n's credential store. Do not commit real API keys to GitHub.
+8. Set up the Telegram trigger/webhook as required by your n8n hosting environment.
+9. Test with non-sensitive sample requests before using real email, calendar, or meeting data.
 
-| Technology | Purpose |
-|---|---|
-| n8n | Workflow orchestration and automation |
-| OpenAI | Natural-language understanding and AI agent reasoning |
-| Telegram Bot API | User interaction and notifications |
-| Google Calendar API | Meeting scheduling |
-| Gmail API | Email communication |
-| Fireflies.ai GraphQL API | Meeting transcript retrieval |
-| Google Meet | Online meeting links, when configured |
+## Fireflies API key safety
 
-## ⚙️ How It Works
+The exported JSON intentionally contains the placeholder `YOUR_FIREFLIES_API_KEY` instead of a real Fireflies token. This placeholder is not a working key. For use in n8n, store your key in an n8n credential (for example, a Header Auth credential with header name `Authorization` and value `Bearer <your-key>`) and select that credential in both Fireflies HTTP Request nodes.
 
-1. **User Request:** The user sends an instruction through Telegram.
-2. **AI Processing:** The n8n AI Agent interprets the request and determines which tools are required.
-3. **Tool Selection:** The agent uses connected services such as Google Calendar, Gmail, or Fireflies.ai.
-4. **Action Execution:** The relevant workflow executes the requested operation.
-5. **Result Collection:** The workflow collects the outcome from the connected service.
-6. **Telegram Response:** The agent or workflow reports the result to the user.
+Never publish API keys, OAuth tokens, bot tokens, passwords, or credential exports in a public repository. If a real key was previously committed or shared, revoke it and create a replacement; deleting it from the latest file does not invalidate the old key.
 
-## 🔄 Workflow Architecture
+## Notes and limitations
 
-```text
-           User
-             |
-             v
-       Telegram Bot
-             |
-             v
-        n8n AI Agent
-             |
-      +------+------+ 
-      |      |      |
-      v      v      v
- Google    Gmail  Fireflies.ai
- Calendar   API   GraphQL API
-      |      |      |
-      v      v      v
-  Meetings Emails Transcripts
-      |      |      |
-      +------+------+
-             |
-             v
-      Telegram Response
-```
-
-*This diagram represents the logical architecture. Actual tool connections depend on the implemented n8n workflows.*
-
-## 💬 Example Use Cases
-
-### 1. Schedule a Meeting
-
-**User request:**
-
-"Schedule a meeting with Rahul tomorrow at 3 PM and email him the meeting details."
-
-**Workflow:**
-
-1. The agent extracts the meeting details.
-2. Google Calendar creates the event if the request is valid and the operation succeeds.
-3. A Google Meet link is attached if the integration is configured.
-4. Gmail sends the meeting details to the intended recipient.
-5. Telegram reports the result to the user.
-
-The agent should verify the date, timezone, recipient, and operation outcome before reporting success.
-
-### 2. Retrieve Meeting Transcripts
-
-The user requests information from a previous meeting.
-
-**Workflow:**
-
-1. The agent receives the transcript request.
-2. The workflow obtains the relevant transcript ID.
-3. A Fireflies.ai GraphQL request retrieves the transcript information.
-4. The returned content can be used to answer the user's question, where supported.
-
-### 3. Send Emails
-
-The user requests an email through Telegram.
-
-The agent identifies the recipient, subject, and message, then uses the configured Gmail integration to send it. Any necessary clarification or confirmation should happen before the email is sent.
-
-### 4. Productivity Notifications
-
-The workflow can send Telegram notifications about completed actions, meeting details, and other supported tasks.
-
-## 🔧 Setup and Configuration
-
-### Prerequisites
-
-- An [n8n](https://n8n.io/) account or self-hosted instance
-- An [OpenAI Platform](https://platform.openai.com/) account
-- A Telegram bot created through [BotFather](https://t.me/BotFather)
-- A Google account with the required Gmail and Google Calendar access
-- A [Fireflies.ai](https://fireflies.ai/) account and API access, if using transcript retrieval
-
-### Step 1: Configure Telegram
-
-1. Create a bot using Telegram's BotFather.
-2. Obtain the bot token.
-3. Configure the Telegram trigger or integration in n8n.
-4. Store the token securely in n8n credentials.
-
-### Step 2: Configure the AI Agent
-
-1. Create an n8n workflow with a Telegram trigger.
-2. Add an AI Agent node.
-3. Connect the OpenAI model.
-4. Configure the system prompt to define the agent's role, tool usage, and response rules.
-
-### Step 3: Connect Google Calendar and Gmail
-
-1. Configure the required Google OAuth credentials.
-2. Enable the relevant Google APIs if required.
-3. Connect Google Calendar tools for creating and managing events.
-4. Connect Gmail
+- This is a sanitized workflow export, not a turnkey hosted service. It requires credentials and setup in the importing n8n instance.
+- Node availability, n8n version differences, model access, and provider API changes may require adjustments.
+- The workflow can send emails and create calendar events when configured. Test carefully and only connect accounts you control.
+- The exported workflow retains some original credential references and webhook/node identifiers to preserve the provided structure. These identifiers are not the same as the secret credential values, but you can reselect credentials after importing.

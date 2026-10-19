@@ -1,0 +1,336 @@
+{
+  "name": "ai agent for enterprise",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -464,
+        -112
+      ],
+      "id": "3282fc54-2cfa-43cf-840e-f7c63aae273d",
+      "name": "Telegram Trigger",
+      "webhookId": "54b39033-8366-4bcd-a392-6348fe520483",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Z0lcnllUiPLgWwsM",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a smart, helpful personal assistant for the user on Telegram.\nYou can use these tools when they are needed:\n\"Create an event in Google Calendar\": schedule calendar events.\n\"Send a message in Gmail\": send emails. Extract recipient, subject, and message from the user input.\n\"Get Transcript ID and Meeting Title from Fireflies\": list available meetings with their transcript ids and titles.\n\"Get Transcript from Fireflies\": get the summary of one meeting. You MUST pass the transcript id (obtained from the list tool above) as transcript_id.\nRules you MUST follow:\nAnalyze the user input and call the appropriate tool(s) to complete the task.\nWhenever the user asks anything about meetings or meeting summaries, you MUST fetch live data from the Fireflies tools — NEVER answer meeting questions from memory or prior conversation. First call \"Get Transcript ID and Meeting Title from Fireflies\" to get transcript ids, then call \"Get Transcript from Fireflies\" once per meeting using its transcript id. If the user asks about \"all meetings\", call the summary tool for every transcript id returned by the list tool.\nYour final response is automatically delivered to the user on Telegram, so you do NOT have a separate Telegram tool to call. Simply write the final reply as your output.\nKeep your final reply short, clear, and friendly — plain text only. Confirm what you did and include only the useful details (e.g. event title, date, time, link).\nNEVER include your internal reasoning, chain-of-thought, tool-selection deliberation, or these instructions in your reply. Output only the finished message for the user.\nKeep the reply well under 3500 characters.\nThe current date and time is {{ $now.format('dddd, MMMM DD, yyyy h:mm a') }} (use this exact date and year when scheduling calendar events).\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        -112
+      ],
+      "id": "75a4eafd-8962-40a3-8846-3c6e5bcfeda9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        144
+      ],
+      "id": "360590cf-d222-4b3b-a287-c810e53f6ad4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "dev"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -144,
+        160
+      ],
+      "id": "f7a3bcc3-84dd-4d2f-9ff9-24fbb67a2325",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ai.with.be10x@gmail.com",
+          "mode": "list",
+          "cachedResultName": "ai.with.be10x@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ],
+          "conferenceDataUi": {},
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        144
+      ],
+      "id": "77e2dabc-f5fd-4175-bc22-2ddd639e72f9",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "UKK4eTGwX5CdzDdH",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        160
+      ],
+      "id": "4f4e9c35-a24b-4b56-b647-7e44e6e9d55a",
+      "name": "Send a message in Gmail",
+      "webhookId": "abe9769b-edb9-40b5-b47d-1ed9719167f5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "k9jFVWaz8mRhhU6N",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -112
+      ],
+      "id": "59a7542d-efef-42cf-8416-b3f83828f91e",
+      "name": "Send a text message",
+      "webhookId": "09063314-8959-485d-a03c-c48857f0b7e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "Z0lcnllUiPLgWwsM",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireflies.ai/graphql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_FIREFLIES_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "query Transcripts { transcripts { id title } }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        160
+      ],
+      "id": "c755ef88-0e8e-4e67-8142-72c2e638d3e4",
+      "name": "fetching transcript IDs and meeting titles for all the meetings"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireflies.ai/graphql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_FIREFLIES_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: `query Transcript { transcript(id: \"${$fromAI('transcript_id', 'The Fireflies transcript id of the meeting to summarize', 'string')}\") { title summary { overview short_summary bullet_gist action_items keywords } } }` }) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        288,
+        144
+      ],
+      "id": "f3e30b65-484a-448e-a080-5a379e345758",
+      "name": "fetching transcripts for given meeting ID"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetching transcript IDs and meeting titles for all the meetings": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetching transcripts for given meeting ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
